@@ -1,6 +1,7 @@
 import { FormulaType, CalculatorInput } from './types';
 
 export type FormulaResult = Record<string, number>;
+export type OutputFormat = 'currency' | 'percent' | 'number' | 'years';
 
 // ── SIP ──────────────────────────────────────────────────────────────
 function calcSip(values: Record<string, number>): FormulaResult {
@@ -262,5 +263,3 @@ export function formatValue(value: number, format: OutputFormat): string {
       return value.toString();
   }
 }
-
-export type { OutputFormat };
