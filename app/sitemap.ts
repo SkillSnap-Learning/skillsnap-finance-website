@@ -16,9 +16,25 @@ async function getCalculatorSlugs(): Promise<string[]> {
   }
 }
 
+async function getFinanceBlogSlugs(): Promise<{ category: string; slug: string }[]> {
+  try {
+    const res = await fetch(`${API}/finance/blogs?isPublished=true&limit=1000`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return (json.data?.blogs ?? []).map((b: any) => ({
+      category: typeof b.category === "object" ? b.category.slug : "investing",
+      slug: b.slug,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const slugs = await getCalculatorSlugs();
-
+  const blogSlugs = await getFinanceBlogSlugs();
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -93,5 +109,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       : 0.9,  // core calculators high priority
   }));
 
-  return [...staticPages, ...calculatorPages];
+  // Dynamic finance blog pages
+  const blogPages: MetadataRoute.Sitemap = blogSlugs.map(({ category, slug }) => ({
+    url: `${BASE}/${category}/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+    }));
+
+  return [...staticPages, ...calculatorPages, ...blogPages];
 }
