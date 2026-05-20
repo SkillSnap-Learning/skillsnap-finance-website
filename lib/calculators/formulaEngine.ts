@@ -173,7 +173,61 @@ const FORMULAS: Record<FormulaType, (values: Record<string, number>) => FormulaR
   fd:        calcFd,
   rd:        calcRd,
   nps:       calcNps,
-  tax:       () => ({}), // tax is complex — handled separately in its own component
+  tax: (values) => {
+    const income = values.annualIncome;
+    const hra = values.hraExemption || 0;
+    const sec80c = Math.min(values.section80cInvestments || 0, 150000);
+    const otherDeductions = values.otherDeductions || 0;
+
+    // ── New Regime (FY 2025-26) ──
+    // Standard deduction: 75,000
+    const newStandardDeduction = 75000;
+    const newTaxableIncome = Math.max(0, income - newStandardDeduction);
+
+    function calcNewRegimeTax(taxable: number): number {
+        if (taxable <= 300000)  return 0;
+        if (taxable <= 700000)  return (taxable - 300000) * 0.05;
+        if (taxable <= 1000000) return 20000 + (taxable - 700000) * 0.10;
+        if (taxable <= 1200000) return 50000 + (taxable - 1000000) * 0.15;
+        if (taxable <= 1500000) return 80000 + (taxable - 1200000) * 0.20;
+        return 140000 + (taxable - 1500000) * 0.30;
+    }
+
+    // Rebate u/s 87A — new regime: full rebate if taxable <= 7,00,000
+    let newTax = calcNewRegimeTax(newTaxableIncome);
+    if (newTaxableIncome <= 700000) newTax = 0;
+    // Add 4% health & education cess
+    newTax = Math.round(newTax * 1.04);
+
+    // ── Old Regime (FY 2025-26) ──
+    // Standard deduction: 50,000
+    const oldStandardDeduction = 50000;
+    const oldTaxableIncome = Math.max(
+        0,
+        income - oldStandardDeduction - hra - sec80c - otherDeductions
+    );
+
+    function calcOldRegimeTax(taxable: number): number {
+        if (taxable <= 250000)  return 0;
+        if (taxable <= 500000)  return (taxable - 250000) * 0.05;
+        if (taxable <= 1000000) return 12500 + (taxable - 500000) * 0.20;
+        return 112500 + (taxable - 1000000) * 0.30;
+    }
+
+    // Rebate u/s 87A — old regime: full rebate if taxable <= 5,00,000
+    let oldTax = calcOldRegimeTax(oldTaxableIncome);
+    if (oldTaxableIncome <= 500000) oldTax = 0;
+    // Add 4% cess
+    oldTax = Math.round(oldTax * 1.04);
+
+    const taxSaved = Math.max(0, oldTax - newTax);
+
+    return {
+        taxSaved,
+        oldRegimeTax: oldTax,
+        newRegimeTax: newTax,
+    };
+    },
 };
 
 export function calculate(formulaType: FormulaType, values: Record<string, number>): FormulaResult {

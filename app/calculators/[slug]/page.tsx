@@ -10,6 +10,51 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+function buildJsonLd(calculator: Calculator, slug: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": calculator.heading,
+    "description": calculator.metaDescription,
+    "url": `https://finance.skillsnaplearning.com/calculators/${slug}`,
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR",
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "SkillSnap Finance",
+      "url": "https://finance.skillsnaplearning.com",
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://finance.skillsnaplearning.com",
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Calculators",
+          "item": "https://finance.skillsnaplearning.com/calculators",
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": calculator.heading,
+          "item": `https://finance.skillsnaplearning.com/calculators/${slug}`,
+        },
+      ],
+    },
+  };
+}
+
 // Generate all static paths at build time
 export async function generateStaticParams() {
   const slugs = await getAllActiveSlugs();
@@ -48,6 +93,10 @@ export default async function CalculatorPage({ params }: Props) {
 
   return (
     <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(calculator, slug)) }}
+    />
       <Navbar />
       <CalculatorShell
         heading={calculator.heading}
