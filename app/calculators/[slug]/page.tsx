@@ -5,6 +5,7 @@ import Footer from "@/components/shared/Footer";
 import CalculatorShell from "@/components/calculators/CalculatorShell";
 import CalculatorUI from "@/components/calculators/CalculatorUI";
 import { getCalculatorBySlug, getAllActiveSlugs } from "@/lib/calculators/api";
+import { Calculator } from "@/lib/calculators/types";
 
 type Props = {
   params: Promise<{ slug: string }>;
