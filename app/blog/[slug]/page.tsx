@@ -7,23 +7,21 @@ import Footer from "@/components/shared/Footer";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://api.skillsnaplearning.com/api/v1";
 
-// Valid category slugs — prevents this catch-all from eating other routes
-const VALID_CATEGORIES = [
-  "investing", "tax", "insurance", "loans",
-  "family-finance", "schemes", "glossary",
-];
-
 type Props = {
-  params: Promise<{ category: string; slug: string }>;
+  params: Promise<{ slug: string }>;
 };
 
 async function getBlog(slug: string) {
-  const res = await fetch(`${API}/finance/blogs/${slug}`, {
-    next: { revalidate: 60 },
-  });
-  if (!res.ok) return null;
-  const json = await res.json();
-  return json.data;
+  try {
+    const res = await fetch(`${API}/finance/blogs/${slug}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data;
+  } catch {
+    return null;
+  }
 }
 
 async function getAllSlugs() {
@@ -41,22 +39,18 @@ async function getAllSlugs() {
 
 export async function generateStaticParams() {
   const blogs = await getAllSlugs();
-  return blogs.map((b: any) => ({
-    category: typeof b.category === "object" ? b.category.slug : "investing",
-    slug: b.slug,
-  }));
+  return blogs.map((b: any) => ({ slug: b.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const blog = await getBlog(slug);
   if (!blog) return { title: "Article — SkillSnap Finance" };
-
   return {
     title: blog.metaTitle || blog.title,
     description: blog.metaDescription || blog.excerpt,
     alternates: {
-      canonical: `https://finance.skillsnaplearning.com/${typeof blog.category === "object" ? blog.category.slug : "investing"}/${blog.slug}`,
+      canonical: `https://finance.skillsnaplearning.com/blog/${blog.slug}`,
     },
     openGraph: {
       title: blog.metaTitle || blog.title,
@@ -67,16 +61,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ArticlePage({ params }: Props) {
-  const { category, slug } = await params;
-
-  // Don't intercept non-article routes
-  if (!VALID_CATEGORIES.includes(category)) notFound();
-
+  const { slug } = await params;
   const blog = await getBlog(slug);
   if (!blog) notFound();
 
-  const categorySlug = typeof blog.category === "object" ? blog.category.slug : category;
-  const categoryName = typeof blog.category === "object" ? blog.category.name : category;
+  const catName = typeof blog.category === "object" ? blog.category.name : "Article";
+  const catSlug = typeof blog.category === "object" ? blog.category.slug : "";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -85,10 +75,7 @@ export default async function ArticlePage({ params }: Props) {
     "description": blog.metaDescription || blog.excerpt,
     "datePublished": blog.publishedAt,
     "dateModified": blog.updatedAt,
-    "author": {
-      "@type": "Organization",
-      "name": "SkillSnap Finance",
-    },
+    "author": { "@type": "Organization", "name": "SkillSnap Finance" },
     "publisher": {
       "@type": "Organization",
       "name": "SkillSnap Finance",
@@ -96,7 +83,7 @@ export default async function ArticlePage({ params }: Props) {
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://finance.skillsnaplearning.com/${categorySlug}/${blog.slug}`,
+      "@id": `https://finance.skillsnaplearning.com/blog/${blog.slug}`,
     },
     ...(blog.coverImage && { "image": blog.coverImage }),
   };
@@ -120,36 +107,46 @@ export default async function ArticlePage({ params }: Props) {
           }}>
             <Link href="/" style={{ color: "var(--muted)", textDecoration: "none" }}>Home</Link>
             <span style={{ color: "var(--border)", fontSize: 14 }}>›</span>
-            <Link href={`/${categorySlug}`} style={{ color: "var(--muted)", textDecoration: "none", textTransform: "capitalize" }}>
-              {categoryName}
-            </Link>
+            <Link href="/blog" style={{ color: "var(--muted)", textDecoration: "none" }}>Blog</Link>
             <span style={{ color: "var(--border)", fontSize: 14 }}>›</span>
-            <span style={{ color: "var(--text)", fontWeight: 600 }}
-              dangerouslySetInnerHTML={{ __html: blog.title.length > 50 ? blog.title.slice(0, 50) + "..." : blog.title }}
-            />
+            {catSlug && (
+              <>
+                <Link
+                  href={`/blog?category=${catSlug}`}
+                  style={{ color: "var(--muted)", textDecoration: "none" }}
+                >
+                  {catName}
+                </Link>
+                <span style={{ color: "var(--border)", fontSize: 14 }}>›</span>
+              </>
+            )}
+            <span style={{ color: "var(--text)", fontWeight: 600 }}>
+              {blog.title.length > 50 ? blog.title.slice(0, 50) + "..." : blog.title}
+            </span>
           </div>
 
           <div className="article-layout">
 
-            {/* Main content */}
+            {/* Main */}
             <article className="article-main">
 
               {/* Header */}
               <div style={{ marginBottom: 32 }}>
-                {/* Category + read time */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                  <Link
-                    href={`/${categorySlug}`}
-                    style={{
-                      fontSize: 11, fontWeight: 700,
-                      letterSpacing: ".08em", textTransform: "uppercase",
-                      color: "var(--em)", textDecoration: "none",
-                      background: "var(--el)", padding: "3px 10px",
-                      borderRadius: 100,
-                    }}
-                  >
-                    {categoryName}
-                  </Link>
+                  {catSlug && (
+                    <Link
+                      href={`/blog?category=${catSlug}`}
+                      style={{
+                        fontSize: 11, fontWeight: 700,
+                        letterSpacing: ".08em", textTransform: "uppercase",
+                        color: "var(--em)", textDecoration: "none",
+                        background: "var(--el)", padding: "3px 10px",
+                        borderRadius: 100,
+                      }}
+                    >
+                      {catName}
+                    </Link>
+                  )}
                   {blog.readTime && (
                     <span style={{ fontSize: 12.5, color: "var(--muted)" }}>
                       {blog.readTime}
@@ -157,7 +154,6 @@ export default async function ArticlePage({ params }: Props) {
                   )}
                 </div>
 
-                {/* Title */}
                 <h1 style={{
                   fontFamily: "var(--font-jakarta)",
                   fontSize: "clamp(24px,3.5vw,40px)", fontWeight: 800,
@@ -167,21 +163,17 @@ export default async function ArticlePage({ params }: Props) {
                   {blog.title}
                 </h1>
 
-                {/* Excerpt */}
                 <p style={{
                   fontSize: 17, color: "var(--muted)",
-                  lineHeight: 1.7, marginBottom: 24,
-                  maxWidth: 680,
+                  lineHeight: 1.7, marginBottom: 24, maxWidth: 680,
                 }}>
                   {blog.excerpt}
                 </p>
 
-                {/* Meta row */}
                 <div style={{
                   display: "flex", alignItems: "center", gap: 16,
                   paddingBottom: 24, borderBottom: "1px solid var(--border)",
-                  fontSize: 13, color: "var(--muted)",
-                  flexWrap: "wrap",
+                  fontSize: 13, color: "var(--muted)", flexWrap: "wrap",
                 }}>
                   <span>SkillSnap Finance</span>
                   {blog.publishedAt && (
@@ -229,7 +221,7 @@ export default async function ArticlePage({ params }: Props) {
                 </div>
               )}
 
-              {/* Article content */}
+              {/* Content */}
               {blog.content && (
                 <div
                   className="article-content"
@@ -254,7 +246,10 @@ export default async function ArticlePage({ params }: Props) {
                     Disclaimer
                   </div>
                   <p style={{ fontSize: 13, color: "#78350F", lineHeight: 1.65 }}>
-                    This article is for informational purposes only and does not constitute financial advice. Mutual fund investments are subject to market risks. Please read all scheme-related documents carefully before investing. Past performance is not indicative of future results.
+                    This article is for informational purposes only and does not
+                    constitute financial advice. Mutual fund investments are subject
+                    to market risks. Please read all scheme-related documents carefully
+                    before investing. Past performance is not indicative of future results.
                   </p>
                 </div>
               )}
@@ -284,10 +279,7 @@ export default async function ArticlePage({ params }: Props) {
                         }}>
                           {faq.question}
                         </div>
-                        <div style={{
-                          fontSize: 14, color: "var(--muted)",
-                          lineHeight: 1.75,
-                        }}>
+                        <div style={{ fontSize: 14, color: "var(--muted)", lineHeight: 1.75 }}>
                           {faq.answer}
                         </div>
                       </div>
@@ -308,37 +300,39 @@ export default async function ArticlePage({ params }: Props) {
                     Related Articles
                   </h2>
                   <div className="related-grid">
-                    {blog.relatedPosts.map((post: any) => {
-                      const postCat = typeof post.category === "object" ? post.category.slug : categorySlug;
-                      return (
-                        <Link key={post._id} href={`/${postCat}/${post.slug}`} className="related-card">
-                          {post.coverImage && (
-                            <div style={{ height: 120, borderRadius: "10px 10px 0 0", overflow: "hidden", position: "relative" }}>
-                              <Image src={post.coverImage} alt={post.title} fill style={{ objectFit: "cover" }} />
+                    {blog.relatedPosts.map((post: any) => (
+                      <Link key={post._id} href={`/blog/${post.slug}`} className="related-card">
+                        {post.coverImage && (
+                          <div style={{
+                            height: 120, borderRadius: "10px 10px 0 0",
+                            overflow: "hidden", position: "relative",
+                          }}>
+                            <Image src={post.coverImage} alt={post.title} fill style={{ objectFit: "cover" }} />
+                          </div>
+                        )}
+                        <div style={{ padding: "14px 16px" }}>
+                          <div style={{
+                            fontFamily: "var(--font-jakarta)",
+                            fontSize: 14, fontWeight: 700,
+                            color: "var(--text)", lineHeight: 1.35,
+                            marginBottom: 6,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}>
+                            {post.title}
+                          </div>
+                          {post.publishedAt && (
+                            <div style={{ fontSize: 11.5, color: "var(--muted)" }}>
+                              {new Date(post.publishedAt).toLocaleDateString("en-IN", {
+                                day: "numeric", month: "short", year: "numeric",
+                              })}
                             </div>
                           )}
-                          <div style={{ padding: "14px 16px" }}>
-                            <div style={{
-                              fontFamily: "var(--font-jakarta)",
-                              fontSize: 14, fontWeight: 700,
-                              color: "var(--text)", lineHeight: 1.35,
-                              marginBottom: 6,
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                            }}>
-                              {post.title}
-                            </div>
-                            {post.publishedAt && (
-                              <div style={{ fontSize: 11.5, color: "var(--muted)" }}>
-                                {new Date(post.publishedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                              </div>
-                            )}
-                          </div>
-                        </Link>
-                      );
-                    })}
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 </div>
               )}
@@ -353,7 +347,9 @@ export default async function ArticlePage({ params }: Props) {
                   <div className="sidebar-widget-title">Free Calculators</div>
                   {blog.relatedCalculators.map((c: any, i: number) => (
                     <Link key={i} href={c.href} className="sidebar-widget-link">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: "var(--em)", flexShrink: 0 }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="2.5"
+                        style={{ color: "var(--em)", flexShrink: 0 }}>
                         <rect x="4" y="2" width="16" height="20" rx="2"/>
                         <line x1="8" y1="6" x2="16" y2="6"/>
                         <line x1="8" y1="10" x2="16" y2="10"/>
@@ -365,7 +361,7 @@ export default async function ArticlePage({ params }: Props) {
                 </div>
               )}
 
-              {/* All calculators CTA */}
+              {/* Calculators CTA */}
               <div style={{
                 background: "linear-gradient(145deg, var(--navy) 0%, #1e3a8a 100%)",
                 borderRadius: 14, padding: "20px",
@@ -377,7 +373,10 @@ export default async function ArticlePage({ params }: Props) {
                 }}>
                   Free Financial Calculators
                 </div>
-                <p style={{ fontSize: 12.5, color: "rgba(255,255,255,.55)", lineHeight: 1.6, marginBottom: 16 }}>
+                <p style={{
+                  fontSize: 12.5, color: "rgba(255,255,255,.55)",
+                  lineHeight: 1.6, marginBottom: 16,
+                }}>
                   SIP, EMI, Tax, PPF and more — no sign-up needed.
                 </p>
                 <Link href="/calculators" style={{
@@ -424,7 +423,6 @@ export default async function ArticlePage({ params }: Props) {
           gap: 40px;
           align-items: flex-start;
         }
-        .article-main {}
         .article-sidebar {
           position: sticky;
           top: 88px;
@@ -462,8 +460,6 @@ export default async function ArticlePage({ params }: Props) {
         }
         .sidebar-widget-link:last-child { border-bottom: none; }
         .sidebar-widget-link:hover { color: var(--navy-2); }
-
-        /* Article content styles */
         .article-content {
           font-size: 16px;
           color: var(--text);
@@ -493,10 +489,7 @@ export default async function ArticlePage({ params }: Props) {
           color: var(--text);
           margin: 20px 0 8px;
         }
-        .article-content p {
-          margin-bottom: 20px;
-          color: #374151;
-        }
+        .article-content p { margin-bottom: 20px; color: #374151; }
         .article-content ul, .article-content ol {
           margin: 0 0 20px 24px;
           color: #374151;
@@ -546,8 +539,6 @@ export default async function ArticlePage({ params }: Props) {
           border-radius: 10px;
           margin: 16px 0;
         }
-
-        /* Related posts */
         .related-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -565,7 +556,6 @@ export default async function ArticlePage({ params }: Props) {
           box-shadow: 0 4px 20px rgba(11,31,79,.08);
           transform: translateY(-2px);
         }
-
         @media (max-width: 1024px) {
           .article-layout { grid-template-columns: 1fr; }
           .article-sidebar { position: relative; top: auto; }

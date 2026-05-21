@@ -111,7 +111,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Dynamic finance blog pages
   const blogPages: MetadataRoute.Sitemap = blogSlugs.map(({ category, slug }) => ({
-    url: `${BASE}/${category}/${slug}`,
+    url: `${BASE}/blog/${slug}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.8,
