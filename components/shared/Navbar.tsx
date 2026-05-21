@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -406,6 +406,334 @@ function MobLink({ href, label }: { href: string; label: string }) {
   );
 }
 
+function RecentArticles({ onClose }: { onClose: () => void }) {
+  const [articles, setArticles] = useState<any[]>([]);
+  const API = process.env.NEXT_PUBLIC_API_URL || "https://api.skillsnaplearning.com/api/v1";
+
+  useEffect(() => {
+    fetch(`${API}/finance/blogs?isPublished=true&limit=2`)
+      .then(r => r.json())
+      .then(json => setArticles(json.data?.blogs ?? []))
+      .catch(() => {});
+  }, []);
+
+  if (articles.length === 0) return (
+    <div style={{ padding: "8px 16px" }}>
+      <p style={{ fontSize: 12.5, color: V.muted, lineHeight: 1.6 }}>
+        Start typing to search articles.
+      </p>
+    </div>
+  );
+
+  return (
+    <>
+      {articles.map((blog: any, i: number) => (
+        <Link
+          key={blog._id}
+          href={`/blog/${blog.slug}`}
+          onClick={onClose}
+          style={{
+            display: "flex", flexDirection: "column", gap: 4,
+            padding: "10px 16px",
+            borderBottom: i < articles.length - 1 ? `1px solid ${V.border}` : "none",
+            textDecoration: "none",
+            transition: "background .15s",
+          }}
+          className="search-item"
+        >
+          <span style={{
+            fontSize: 13, fontWeight: 600, color: V.text,
+            lineHeight: 1.35,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          } as React.CSSProperties}>
+            {blog.title}
+          </span>
+          <span style={{ fontSize: 11.5, color: V.muted }}>
+            {typeof blog.category === "object" ? blog.category.name : "Article"}
+            {blog.readTime ? ` · ${blog.readTime}` : ""}
+          </span>
+        </Link>
+      ))}
+    </>
+  );
+}
+
+// ── Search Bar with inline dropdown ──────────────────────────────────
+function SearchBar() {
+  const [query, setQuery]       = useState("");
+  const [open, setOpen]         = useState(false);
+  const [blogs, setBlogs]       = useState<any[]>([]);
+  const [calcs, setCalcs]       = useState<any[]>([]);
+  const [loading, setLoading]   = useState(false);
+  const wrapRef                 = useRef<HTMLDivElement>(null);
+  const debounceRef             = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const API = process.env.NEXT_PUBLIC_API_URL || "https://api.skillsnaplearning.com/api/v1";
+
+  const POPULAR = [
+    { label: "SIP Calculator",          href: "/calculators/sip-calculator"              },
+    { label: "Old vs New Tax Regime",   href: "/blog/old-vs-new-tax-regime"              },
+    { label: "EMI Calculator",          href: "/calculators/emi-calculator"              },
+    { label: "PPF Calculator",          href: "/calculators/ppf-calculator"              },
+    { label: "Term Insurance Guide",    href: "/blog/term-insurance-how-much-needed"     },
+    { label: "Index Funds Guide",       href: "/blog/index-funds-vs-active-funds"        },
+  ];
+
+  // Debounced search
+  useEffect(() => {
+    if (!query.trim()) { setBlogs([]); setCalcs([]); setLoading(false); return; }
+    setLoading(true);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const [blogsRes, calcsRes] = await Promise.all([
+          fetch(`${API}/finance/blogs?isPublished=true&search=${encodeURIComponent(query)}&limit=5`),
+          fetch(`${API}/calculators?isActive=true&search=${encodeURIComponent(query)}`),
+        ]);
+        const [blogsJson, calcsJson] = await Promise.all([blogsRes.json(), calcsRes.json()]);
+        setBlogs(blogsJson.data?.blogs ?? []);
+        setCalcs((calcsJson.data ?? []).slice(0, 5));
+      } catch {
+        setBlogs([]); setCalcs([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query]);
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // Close on Escape
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, []);
+
+  const hasResults = blogs.length > 0 || calcs.length > 0;
+  const showPopular = !query.trim();
+
+  return (
+    <div
+      ref={wrapRef}
+      style={{ flex: 1, minWidth: 0, maxWidth: 380, position: "relative" }}
+      className="hide-mobile"
+    >
+      {/* Input */}
+      <input
+        type="text"
+        value={query}
+        onChange={e => { setQuery(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        placeholder="Search articles, calculators…"
+        style={{
+          width: "100%", height: 38,
+          padding: "0 36px 0 14px",
+          border: `1.5px solid ${open ? V.navy2 : V.border}`,
+          borderRadius: 8,
+          fontSize: 13, fontFamily: "inherit",
+          color: V.text,
+          background: open ? "white" : V.bg,
+          outline: "none",
+          transition: "all .2s",
+          boxShadow: open ? `0 0 0 3px rgba(26,58,143,.08)` : "none",
+        }}
+      />
+      <span style={{
+        position: "absolute", right: 10, top: "50%",
+        transform: "translateY(-50%)",
+        color: "#94A3B8", display: "flex", pointerEvents: "none",
+      }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </span>
+
+      {/* Dropdown */}
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 8px)", left: 0,
+          width: "min(680px, 90vw)",
+          background: "white",
+          border: `1px solid ${V.border}`,
+          borderRadius: 14,
+          boxShadow: "0 8px 40px rgba(11,31,79,.13), 0 2px 8px rgba(11,31,79,.07)",
+          zIndex: 600,
+          overflow: "hidden",
+          display: "flex",
+        }}>
+
+          {/* Left col */}
+          <div style={{
+            flex: 1, borderRight: `1px solid ${V.border}`,
+            padding: "16px 0",
+            maxHeight: 420, overflowY: "auto",
+          }}>
+            <div style={{
+              fontSize: 10.5, fontWeight: 700,
+              letterSpacing: ".08em", textTransform: "uppercase",
+              color: "#94A3B8", padding: "0 16px 10px",
+            }}>
+              {showPopular ? "Popular Searches" : loading ? "Searching…" : "Calculators"}
+            </div>
+
+            {showPopular ? (
+              POPULAR.map((item, i) => (
+                <Link
+                  key={i}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  style={{
+                    display: "flex", flexDirection: "column",
+                    padding: "10px 16px",
+                    borderBottom: i < POPULAR.length - 1 ? `1px solid ${V.border}` : "none",
+                    textDecoration: "none",
+                    transition: "background .15s",
+                  }}
+                  className="search-item"
+                >
+                  <span style={{ fontSize: 13.5, fontWeight: 600, color: V.text }}>
+                    {item.label}
+                  </span>
+                </Link>
+              ))
+            ) : loading ? (
+              <div style={{ padding: "20px 16px", fontSize: 13, color: V.muted }}>
+                Searching...
+              </div>
+            ) : calcs.length === 0 && !hasResults ? (
+              <div style={{ padding: "20px 16px", fontSize: 13, color: V.muted }}>
+                No results found
+              </div>
+            ) : calcs.length === 0 ? (
+              <div style={{ padding: "20px 16px", fontSize: 13, color: V.muted }}>
+                No calculators found
+              </div>
+            ) : (
+              calcs.map((calc: any, i: number) => (
+                <Link
+                  key={calc._id}
+                  href={`/calculators/${calc.slug}`}
+                  onClick={() => { setOpen(false); setQuery(""); }}
+                  style={{
+                    display: "flex", flexDirection: "column", gap: 2,
+                    padding: "10px 16px",
+                    borderBottom: i < calcs.length - 1 ? `1px solid ${V.border}` : "none",
+                    textDecoration: "none",
+                    transition: "background .15s",
+                  }}
+                  className="search-item"
+                >
+                  <span style={{ fontSize: 13.5, fontWeight: 600, color: V.text }}>
+                    {calc.heading}
+                  </span>
+                  <span style={{ fontSize: 11.5, color: V.muted }}>
+                    Calculator · Free tool
+                  </span>
+                </Link>
+              ))
+            )}
+          </div>
+
+          {/* Right col — Blogs */}
+          <div style={{
+            width: 280, flexShrink: 0,
+            padding: "16px 0",
+            maxHeight: 420, overflowY: "auto",
+          }}>
+            <div style={{
+              fontSize: 10.5, fontWeight: 700,
+              letterSpacing: ".08em", textTransform: "uppercase",
+              color: "#94A3B8", padding: "0 16px 10px",
+              display: "flex", alignItems: "center",
+              justifyContent: "space-between",
+            }}>
+              <span>Articles</span>
+              {!showPopular && blogs.length > 0 && (
+                <Link
+                  href={`/blog?q=${encodeURIComponent(query)}`}
+                  onClick={() => setOpen(false)}
+                  style={{ fontSize: 11, fontWeight: 600, color: V.navy2, textDecoration: "none" }}
+                >
+                  See all
+                </Link>
+              )}
+            </div>
+
+            {showPopular ? (
+              <RecentArticles onClose={() => setOpen(false)} />
+            ) : loading ? (
+              <div style={{ padding: "20px 16px", fontSize: 13, color: V.muted }}>
+                Searching...
+              </div>
+            ) : blogs.length === 0 ? (
+              <div style={{ padding: "20px 16px", fontSize: 13, color: V.muted }}>
+                No articles found
+              </div>
+            ) : (
+              blogs.map((blog: any, i: number) => (
+                <Link
+                  key={blog._id}
+                  href={`/blog/${blog.slug}`}
+                  onClick={() => { setOpen(false); setQuery(""); }}
+                  style={{
+                    display: "flex", flexDirection: "column", gap: 4,
+                    padding: "10px 16px",
+                    borderBottom: i < blogs.length - 1 ? `1px solid ${V.border}` : "none",
+                    textDecoration: "none",
+                    transition: "background .15s",
+                  }}
+                  className="search-item"
+                >
+                  <span style={{
+                    fontSize: 13, fontWeight: 600, color: V.text,
+                    lineHeight: 1.35,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  } as React.CSSProperties}>
+                    {blog.title}
+                  </span>
+                  <span style={{ fontSize: 11.5, color: V.muted }}>
+                    {typeof blog.category === "object" ? blog.category.name : "Article"}
+                    {blog.readTime ? ` · ${blog.readTime}` : ""}
+                  </span>
+                </Link>
+              ))
+            )}
+          </div>
+
+        </div>
+      )}
+
+      <style>{`
+        .search-item:hover {
+          background: ${V.nl} !important;
+        }
+        .search-item:hover span:first-child {
+          color: ${V.navy2} !important;
+        }
+      `}</style>
+    </div>
+  );
+}
+
 // ── Main Navbar ────────────────────────────────────────────────────────
 export default function Navbar() {
   const [mobOpen, setMobOpen] = useState(false);
@@ -463,25 +791,7 @@ export default function Navbar() {
           </Link>
 
           {/* Search */}
-          <div style={{ flex: 1, minWidth: 0, maxWidth: 380, position: "relative" }}>
-            <input
-              type="text"
-              placeholder="Search articles, calculators…"
-              style={{
-                width: "100%", height: 38,
-                padding: "0 36px 0 14px",
-                border: `1.5px solid ${V.border}`, borderRadius: 8,
-                fontSize: 13, fontFamily: "inherit",
-                color: V.text, background: V.bg,
-                outline: "none",
-              }}
-              onFocus={e => { e.target.style.borderColor = V.navy2; e.target.style.background = "white"; }}
-              onBlur={e  => { e.target.style.borderColor = V.border; e.target.style.background = V.bg; }}
-            />
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#94A3B8", display: "flex", pointerEvents: "none" }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            </span>
-          </div>
+          <SearchBar />
 
           {/* Desktop links */}
           <div style={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }} className="hide-mobile">

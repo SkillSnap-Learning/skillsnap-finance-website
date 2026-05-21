@@ -1,83 +1,93 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
-type Article = {
-  href: string;
-  cat: string;
-  wm: string;
-  bg: string;
-  title: string;
-  date: string;
-  read: string;
-};
-
-const DATA: Record<string, Article[]> = {
-  articles: [
-    { href: "/tax/old-regime-vs-new-regime",         cat: "Tax Planning",   wm: "Tax",    bg: "",                                                            title: "Old Tax Regime vs New Tax Regime: Which saves more for a ₹12L salary in 2025–26?",          date: "May 14, 2026", read: "8 mins read" },
-    { href: "/investing/index-funds-vs-active-funds", cat: "Investing",      wm: "Invest", bg: "linear-gradient(135deg,#064e3b 0%,#059669 100%)",             title: "Why index funds beat 90% of active mutual funds — and how to pick the right one",            date: "May 12, 2026", read: "6 mins read" },
-    { href: "/insurance/lic-vs-term-insurance",       cat: "Insurance",      wm: "Insure", bg: "linear-gradient(135deg,#3b0764 0%,#7c3aed 100%)",             title: "LIC vs Term Insurance: The honest comparison your agent doesn't want you to see",            date: "May 10, 2026", read: "5 mins read" },
-    { href: "/family-finance/child-education-corpus", cat: "Family Finance", wm: "Family", bg: "linear-gradient(135deg,#831843 0%,#db2777 100%)",             title: "How much should you save for your child's engineering degree in 2033?",                      date: "May 8, 2026",  read: "7 mins read" },
-    { href: "/schemes/sukanya-samriddhi-yojana",      cat: "Govt. Schemes",  wm: "Govt",   bg: "linear-gradient(135deg,#0c4a6e 0%,#0284c7 100%)",             title: "Sukanya Samriddhi Yojana 2025: Interest rate, rules, and is it worth it?",                   date: "May 6, 2026",  read: "5 mins read" },
-    { href: "/loans/home-loan-prepayment-strategy",   cat: "Loans & Credit", wm: "Loans",  bg: "linear-gradient(135deg,#78350f 0%,#d97706 100%)",             title: "Home loan prepayment strategy: Save ₹12 lakhs in interest with one simple rule",             date: "May 4, 2026",  read: "6 mins read" },
-  ],
-  guides: [
-    { href: "/investing/beginners-guide",             cat: "Investing",      wm: "Guide",  bg: "linear-gradient(135deg,#064e3b 0%,#059669 100%)",             title: "Complete Beginner's Guide to Investing in India — where to start in 2025",                  date: "May 2, 2026",  read: "12 mins read" },
-    { href: "/tax/complete-80c-guide",                cat: "Tax Planning",   wm: "Tax",    bg: "",                                                            title: "Section 80C: The complete guide to saving ₹46,800 in tax every year",                        date: "Apr 30, 2026", read: "10 mins read" },
-    { href: "/insurance/health-insurance-guide",      cat: "Insurance",      wm: "Guide",  bg: "linear-gradient(135deg,#3b0764 0%,#7c3aed 100%)",             title: "Health Insurance in India: Everything you need to know before buying",                       date: "Apr 28, 2026", read: "11 mins read" },
-    { href: "/schemes/ppf-complete-guide",            cat: "Govt. Schemes",  wm: "PPF",    bg: "linear-gradient(135deg,#0c4a6e 0%,#0284c7 100%)",             title: "PPF Complete Guide 2025: Rules, interest rate, withdrawal, and tax benefits",                date: "Apr 26, 2026", read: "9 mins read"  },
-    { href: "/loans/home-loan-guide",                 cat: "Loans",          wm: "Loans",  bg: "linear-gradient(135deg,#78350f 0%,#d97706 100%)",             title: "Home Loan Guide India: Eligibility, interest rates, and EMI strategies",                     date: "Apr 24, 2026", read: "10 mins read" },
-    { href: "/family-finance/emergency-fund-guide",   cat: "Family Finance", wm: "Fund",   bg: "linear-gradient(135deg,#831843 0%,#db2777 100%)",             title: "Emergency Fund: How much do you need and where to keep it in India?",                        date: "Apr 22, 2026", read: "7 mins read"  },
-  ],
-  calculators: [
-    { href: "/calculators/sip-calculator",                       cat: "Calculator",     wm: "SIP",    bg: "linear-gradient(135deg,#064e3b 0%,#059669 100%)",             title: "SIP Calculator — See exactly how ₹5,000/month grows over 10 years",                         date: "Updated May 2026", read: "Free tool" },
-    { href: "/calculators/emi-calculator",                       cat: "Calculator",     wm: "EMI",    bg: "",                                                            title: "EMI Calculator — Home loan, car loan, personal loan monthly outgo",                          date: "Updated May 2026", read: "Free tool" },
-    { href: "/calculators/tax-calculator",                       cat: "Calculator",     wm: "Tax",    bg: "linear-gradient(135deg,#78350f 0%,#d97706 100%)",             title: "Tax Regime Comparator — Old vs New for your exact salary in FY 2025–26",                    date: "Updated May 2026", read: "Free tool" },
-    { href: "/calculators/education-corpus-calculator",          cat: "Calculator",     wm: "Edu",    bg: "linear-gradient(135deg,#831843 0%,#db2777 100%)",             title: "Education Corpus Calculator — How much to save for your child's college in 2033",            date: "Updated May 2026", read: "Free tool" },
-    { href: "/calculators/term-cover-estimator-calculator",                cat: "Calculator",     wm: "Term",   bg: "linear-gradient(135deg,#3b0764 0%,#7c3aed 100%)",             title: "Term Cover Estimator — How much life insurance does your family actually need?",             date: "Updated May 2026", read: "Free tool" },
-    { href: "/calculators/ppf-calculator",                       cat: "Calculator",     wm: "PPF",    bg: "linear-gradient(135deg,#0c4a6e 0%,#0284c7 100%)",             title: "PPF Maturity Calculator — Returns, partial withdrawal, and tax savings",                     date: "Updated May 2026", read: "Free tool" },
-  ],
-};
+const API = process.env.NEXT_PUBLIC_API_URL || "https://api.skillsnaplearning.com/api/v1";
 
 const DEFAULT_BG = "linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 60%,var(--navy-3) 100%)";
 
+const CAT_GRADIENTS: Record<string, string> = {
+  investing:        "linear-gradient(135deg,#064e3b 0%,#059669 100%)",
+  tax:              "linear-gradient(135deg,#78350f 0%,#d97706 100%)",
+  insurance:        "linear-gradient(135deg,#3b0764 0%,#7c3aed 100%)",
+  "family-finance": "linear-gradient(135deg,#831843 0%,#db2777 100%)",
+  schemes:          "linear-gradient(135deg,#0c4a6e 0%,#0284c7 100%)",
+  loans:            "linear-gradient(135deg,#1a2744 0%,#1A3A8F 100%)",
+};
+
+type Tab = "articles" | "calculators";
+
+type Article = {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  category: { name: string; slug: string } | string;
+  coverImage: string | null;
+  readTime: string | null;
+  publishedAt: string | null;
+};
+
+type Calculator = {
+  _id: string;
+  heading: string;
+  slug: string;
+  subheading: string;
+  type: string;
+};
+
 function ArticleCard({ a }: { a: Article }) {
+  const catSlug = typeof a.category === "object" ? a.category.slug : "";
+  const catName = typeof a.category === "object" ? a.category.name : "";
+  const bg = CAT_GRADIENTS[catSlug] || DEFAULT_BG;
+  const wm = catName.slice(0, 6).toUpperCase();
+
   return (
-    <Link href={a.href} className="art-card">
+    <Link href={`/blog/${a.slug}`} className="art-card">
       <div style={{ position: "relative", height: 200, overflow: "hidden" }}>
-        <div style={{
-          width: "100%", height: "100%",
-          background: a.bg || DEFAULT_BG,
-          position: "relative", display: "flex",
-          alignItems: "flex-end", padding: 14,
-        }}>
+        {a.coverImage ? (
+          <img
+            src={a.coverImage}
+            alt={a.title}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          />
+        ) : (
           <div style={{
-            position: "absolute", inset: 0,
-            backgroundImage: "radial-gradient(circle,rgba(255,255,255,.05) 1px,transparent 1px)",
-            backgroundSize: "18px 18px", pointerEvents: "none",
-          }} />
-          <div style={{
-            fontFamily: "var(--font-jakarta)",
-            fontSize: 48, fontWeight: 800,
-            color: "rgba(255,255,255,.08)",
-            position: "absolute", right: 16, bottom: -4,
-            letterSpacing: "-.04em", lineHeight: 1,
+            width: "100%", height: "100%",
+            background: bg,
+            position: "relative", display: "flex",
+            alignItems: "flex-end", padding: 14,
           }}>
-            {a.wm}
+            <div style={{
+              position: "absolute", inset: 0,
+              backgroundImage: "radial-gradient(circle,rgba(255,255,255,.05) 1px,transparent 1px)",
+              backgroundSize: "18px 18px", pointerEvents: "none",
+            }} />
+            <div style={{
+              fontFamily: "var(--font-jakarta)",
+              fontSize: 48, fontWeight: 800,
+              color: "rgba(255,255,255,.08)",
+              position: "absolute", right: 16, bottom: -4,
+              letterSpacing: "-.04em", lineHeight: 1,
+            }}>
+              {wm}
+            </div>
           </div>
-        </div>
-        <span style={{
-          position: "absolute", top: 12, left: 12,
-          padding: "4px 10px", borderRadius: 6,
-          fontSize: 10.5, fontWeight: 700,
-          letterSpacing: ".05em", textTransform: "uppercase",
-          backdropFilter: "blur(8px)",
-          background: "rgba(255,255,255,.15)",
-          border: "1px solid rgba(255,255,255,.2)",
-          color: "white", zIndex: 1,
-        }}>
-          {a.cat}
-        </span>
+        )}
+        {catName && (
+          <span style={{
+            position: "absolute", top: 12, left: 12,
+            padding: "4px 10px", borderRadius: 6,
+            fontSize: 10.5, fontWeight: 700,
+            letterSpacing: ".05em", textTransform: "uppercase",
+            backdropFilter: "blur(8px)",
+            background: "rgba(255,255,255,.15)",
+            border: "1px solid rgba(255,255,255,.2)",
+            color: "white", zIndex: 1,
+          }}>
+            {catName}
+          </span>
+        )}
       </div>
       <div style={{ padding: "18px 20px 20px" }}>
         <div className="art-card-title">{a.title}</div>
@@ -85,9 +95,62 @@ function ArticleCard({ a }: { a: Article }) {
           fontSize: 12, color: "var(--muted)",
           display: "flex", alignItems: "center", gap: 8,
         }}>
-          <span>{a.date}</span>
-          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--border)", flexShrink: 0 }} />
-          <span>{a.read}</span>
+          {a.publishedAt && (
+            <span>{new Date(a.publishedAt).toLocaleDateString("en-IN", {
+              day: "numeric", month: "short", year: "numeric",
+            })}</span>
+          )}
+          {a.readTime && (
+            <>
+              <div style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--border)", flexShrink: 0 }} />
+              <span>{a.readTime}</span>
+            </>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function CalculatorCard({ c }: { c: Calculator }) {
+  return (
+    <Link href={`/calculators/${c.slug}`} className="art-card">
+      <div style={{
+        height: 200,
+        background: "linear-gradient(135deg,var(--navy) 0%,#1e3a8a 60%,#2D5BE3 100%)",
+        position: "relative", display: "flex",
+        alignItems: "flex-end", padding: 14,
+      }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: "radial-gradient(circle,rgba(255,255,255,.05) 1px,transparent 1px)",
+          backgroundSize: "18px 18px", pointerEvents: "none",
+        }} />
+        <div style={{
+          fontFamily: "var(--font-jakarta)",
+          fontSize: 48, fontWeight: 800,
+          color: "rgba(255,255,255,.08)",
+          position: "absolute", right: 16, bottom: -4,
+          letterSpacing: "-.04em", lineHeight: 1,
+        }}>
+          {c.type.toUpperCase()}
+        </div>
+        <span style={{
+          position: "absolute", top: 12, left: 12,
+          padding: "4px 10px", borderRadius: 6,
+          fontSize: 10.5, fontWeight: 700,
+          letterSpacing: ".05em", textTransform: "uppercase",
+          background: "rgba(255,255,255,.15)",
+          border: "1px solid rgba(255,255,255,.2)",
+          color: "white", zIndex: 1,
+        }}>
+          Calculator
+        </span>
+      </div>
+      <div style={{ padding: "18px 20px 20px" }}>
+        <div className="art-card-title">{c.heading}</div>
+        <div style={{ fontSize: 12, color: "var(--muted)" }}>
+          Free tool
         </div>
       </div>
     </Link>
@@ -95,19 +158,37 @@ function ArticleCard({ a }: { a: Article }) {
 }
 
 export default function Articles() {
-  const [active, setActive] = useState<"articles" | "guides" | "calculators">("articles");
+  const [active, setActive] = useState<Tab>("articles");
   const [fading, setFading] = useState(false);
-  const [displayed, setDisplayed] = useState<Article[]>(DATA.articles);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [calculators, setCalculators] = useState<Calculator[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  function switchTab(key: "articles" | "guides" | "calculators") {
+  useEffect(() => {
+    Promise.all([
+      fetch(`${API}/finance/blogs?isPublished=true&limit=6`)
+        .then(r => r.json())
+        .catch(() => ({ data: { blogs: [] } })),
+      fetch(`${API}/calculators?isActive=true`)
+        .then(r => r.json())
+        .catch(() => ({ data: [] })),
+    ]).then(([blogsJson, calcsJson]) => {
+      setArticles(blogsJson.data?.blogs ?? []);
+      setCalculators((calcsJson.data ?? []).filter((c: Calculator) => !c.slug.includes("-sip-") && !c.slug.includes("-emi-") && !c.slug.includes("-ppf-")).slice(0, 6));
+      setLoading(false);
+    });
+  }, []);
+
+  function switchTab(key: Tab) {
     if (key === active) return;
     setFading(true);
     setTimeout(() => {
-      setDisplayed(DATA[key]);
       setActive(key);
       setFading(false);
     }, 150);
   }
+
+  const displayed = active === "articles" ? articles : calculators;
 
   return (
     <section style={{
@@ -130,12 +211,11 @@ export default function Articles() {
           }}>
             Latest Articles
           </h2>
-          {/* Tab toggles */}
           <div style={{
             display: "flex", border: "1px solid var(--border)",
             borderRadius: 8, overflow: "hidden",
           }}>
-            {(["articles", "guides", "calculators"] as const).map(tab => (
+            {(["articles", "calculators"] as Tab[]).map(tab => (
               <button
                 key={tab}
                 onClick={() => switchTab(tab)}
@@ -157,17 +237,44 @@ export default function Articles() {
         </div>
 
         {/* Grid */}
-        <div
-          className="articles-grid"
-          style={{ opacity: fading ? 0 : 1, transition: "opacity .3s ease" }}
-        >
-          {displayed.map((a, i) => <ArticleCard key={i} a={a} />)}
-        </div>
+        {loading ? (
+          <div className="articles-grid">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} style={{
+                borderRadius: 14, overflow: "hidden",
+                border: "1px solid var(--border)", background: "white",
+              }}>
+                <div style={{ height: 200, background: "var(--bg)" }} />
+                <div style={{ padding: "18px 20px" }}>
+                  <div style={{ height: 16, background: "var(--bg)", borderRadius: 4, marginBottom: 8 }} />
+                  <div style={{ height: 12, background: "var(--bg)", borderRadius: 4, width: "60%" }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : displayed.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "40px 0", color: "var(--muted)" }}>
+            No {active} yet — check back soon.
+          </div>
+        ) : (
+          <div
+            className="articles-grid"
+            style={{ opacity: fading ? 0 : 1, transition: "opacity .3s ease" }}
+          >
+            {active === "articles"
+              ? articles.map(a => <ArticleCard key={a._id} a={a} />)
+              : calculators.map(c => <CalculatorCard key={c._id} c={c} />)
+            }
+          </div>
+        )}
 
         {/* View all */}
         <div style={{ textAlign: "center", marginTop: 40 }}>
-          <Link href="/blog" className="art-view-all">
-            View All Articles
+          <Link
+            href={active === "articles" ? "/blog" : "/calculators"}
+            className="art-view-all"
+          >
+            {active === "articles" ? "View All Articles" : "View All Calculators"}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
