@@ -45,7 +45,7 @@ const CARDS = [
     ),
   },
   {
-    href: "/calculators/education-corpus",
+    href: "/calculators/education-corpus-calculator",
     accent: "#DB2777",
     iconBg: "#FDF2F8",
     iconColor: "#DB2777",

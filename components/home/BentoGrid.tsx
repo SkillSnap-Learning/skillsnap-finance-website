@@ -48,7 +48,7 @@ export default function BentoGrid() {
       <div className="bento-grid">
 
         {/* SIP — tall */}
-        <Link href="/calculators/sip" className="bento-item bento-sip">
+        <Link href="/calculators/sip-calculator" className="bento-item bento-sip">
           <div className="bi-ey">Most Popular</div>
           <div className="bi-h" style={{ fontSize: 26 }}>SIP Calculator</div>
           <div className="bi-sub">
@@ -86,7 +86,7 @@ export default function BentoGrid() {
         </Link>
 
         {/* EMI */}
-        <Link href="/calculators/emi" className="bento-item bento-emi">
+        <Link href="/calculators/emi-calculator" className="bento-item bento-emi">
           <div className="bi-ey">Home · Car · Personal</div>
           <div className="bi-h">EMI Calculator</div>
           <div className="bi-sub">Know your exact monthly outgo before you sign any loan agreement.</div>
@@ -96,7 +96,7 @@ export default function BentoGrid() {
         </Link>
 
         {/* Tax */}
-        <Link href="/calculators/tax" className="bento-item bento-tax">
+        <Link href="/calculators/tax-calculator" className="bento-item bento-tax">
           <div className="bi-ey">FY 2025–26</div>
           <div className="bi-h">Tax Regime</div>
           <div className="bi-sub">Old vs New — which saves more at your salary.</div>
@@ -106,7 +106,7 @@ export default function BentoGrid() {
         </Link>
 
         {/* Education — wide */}
-        <Link href="/calculators/education-corpus" className="bento-item bento-edu">
+        <Link href="/calculators/education-corpus-calculator" className="bento-item bento-edu">
           <div className="bi-ey">Plan for 2030–2036</div>
           <div className="bi-h">Education Corpus Calculator</div>
           <div className="bi-sub">

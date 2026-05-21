@@ -20,7 +20,7 @@ const SLIDES = [
     title: "Old regime or new?\nKnow before you file",
     sub: "Our free tax regime calculator tells you exactly which option saves more — for your exact salary and deductions.",
     cta: "Compare Now",
-    href: "/calculators/tax",
+    href: "/calculators/tax-calculator",
   },
   {
     bg: "/images/hero/kum-nahin-complete1920x460.webp",
@@ -38,7 +38,7 @@ const SLIDES = [
     title: "Plan your child's\neducation today",
     sub: "Engineering in 2033 may cost ₹25 lakhs. Use our education corpus calculator to start saving the right amount now.",
     cta: "Calculate Corpus",
-    href: "/calculators/education-corpus",
+    href: "/calculators/education-corpus-calculator",
   },
   {
     bg: "/images/hero/bl_1920x460383f3b2030aa4455b7273f940bc5dfbf.webp",

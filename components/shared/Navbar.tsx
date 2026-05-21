@@ -22,7 +22,7 @@ const loansCols: MegaCol[] = [
       { label: "Home Loan Guide",      href: "/loans/home-loan-guide"         },
       { label: "Balance Transfer",     href: "/loans/balance-transfer"        },
       { label: "Top Up Loan",          href: "/loans/top-up-loan"             },
-      { label: "EMI Calculator",       href: "/calculators/emi"               },
+      { label: "EMI Calculator",       href: "/calculators/emi-calculator"               },
       { label: "Eligibility Criteria", href: "/loans/home-loan-eligibility"   },
       { label: "Interest Rates",       href: "/loans/home-loan-rates"         },
     ],
@@ -33,7 +33,7 @@ const loansCols: MegaCol[] = [
       { label: "Personal Loan Guide",  href: "/loans/personal-loan-guide"     },
       { label: "Loan for Wedding",     href: "/loans/wedding-loan"            },
       { label: "Loan for Vacation",    href: "/loans/vacation-loan"           },
-      { label: "EMI Calculator",       href: "/calculators/emi"               },
+      { label: "EMI Calculator",       href: "/calculators/emi-calculator"               },
       { label: "Eligibility Criteria", href: "/loans/personal-loan-eligibility"},
       { label: "Interest Rates",       href: "/loans/personal-loan-rates"     },
     ],
@@ -45,7 +45,7 @@ const loansCols: MegaCol[] = [
       { label: "Banks vs NBFCs",       href: "/loans/banks-vs-nbfc"           },
       { label: "Moratorium Period",    href: "/loans/moratorium-period"       },
       { label: "Section 80E Benefit",  href: "/loans/section-80e"            },
-      { label: "EMI Calculator",       href: "/calculators/emi"               },
+      { label: "EMI Calculator",       href: "/calculators/emi-calculator"               },
       { label: "Eligibility Criteria", href: "/loans/education-loan-eligibility"},
     ],
   },
@@ -62,8 +62,8 @@ const loansCols: MegaCol[] = [
   {
     heading: "Loan Tools",
     links: [
-      { label: "Home Loan EMI Calc",   href: "/calculators/emi"               },
-      { label: "Personal Loan EMI",    href: "/calculators/emi"               },
+      { label: "Home Loan EMI Calc",   href: "/calculators/emi-calculator"               },
+      { label: "Personal Loan EMI",    href: "/calculators/emi-calculator"               },
       { label: "Prepayment Strategy",  href: "/loans/prepayment-strategy"     },
       { label: "Rent vs Buy",          href: "/loans/rent-vs-buy"             },
     ],
@@ -132,11 +132,11 @@ const toolsCols: MegaCol[] = [
   {
     heading: "Calculators",
     links: [
-      { label: "SIP Calculator",       href: "/calculators/sip"               },
-      { label: "EMI Calculator",       href: "/calculators/emi"               },
-      { label: "Tax Regime Comparator",href: "/calculators/tax"               },
-      { label: "Education Corpus",     href: "/calculators/education-corpus"  },
-      { label: "Term Cover Estimator", href: "/calculators/term-cover"        },
+      { label: "SIP Calculator",       href: "/calculators/sip-calculator"               },
+      { label: "EMI Calculator",       href: "/calculators/emi-calculator"               },
+      { label: "Tax Regime Comparator",href: "/calculators/tax-calculator"               },
+      { label: "Education Corpus",     href: "/calculators/education-corpus-calculator"  },
+      { label: "Term Cover Estimator", href: "/calculators/term-cover-estimator-calculator"        },
     ],
   },
   {
@@ -505,7 +505,7 @@ export default function Navbar() {
                     icon={<TrendingUp size={17} />}
                     title="SIP Calculator"
                     sub="See how ₹5,000/mo grows to ₹11.6L in 10 years"
-                    href="/calculators/sip"
+                    href="/calculators/sip-calculator"
                   />
                   <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
                     {investingCols.map((col, i) => (
@@ -520,7 +520,7 @@ export default function Navbar() {
                   {[
                     { label: "Beginner's Guide to Investing", href: "/investing/beginners-guide" },
                     { label: "Why Index Funds Beat Active Funds", href: "/investing/index-funds-vs-active-funds" },
-                    { label: "SIP Returns Calculator", href: "/calculators/sip" },
+                    { label: "SIP Returns Calculator", href: "/calculators/sip-calculator" },
                   ].map((l, i) => (
                     <span key={l.href} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       {i > 0 && <span style={{ color: "#D1D5DB" }}>·</span>}
@@ -542,7 +542,7 @@ export default function Navbar() {
                 <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${V.border}`, display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: V.muted }}>
                   <FileText size={12} style={{ color: "#94A3B8" }} />
                   Try:
-                  <Link href="/calculators/tax" style={{ fontSize: 12, fontWeight: 600, color: V.navy2, textDecoration: "none" }}>
+                  <Link href="/calculators/tax-calculator" style={{ fontSize: 12, fontWeight: 600, color: V.navy2, textDecoration: "none" }}>
                     Old vs New Regime Calculator
                   </Link>
                 </div>

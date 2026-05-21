@@ -26,10 +26,10 @@ const TOPICS = [
 ];
 
 const CALCULATORS = [
-  { label: "SIP Calculator",        href: "/calculators/sip"               },
-  { label: "EMI Calculator",        href: "/calculators/emi"               },
-  { label: "Tax Regime Comparator", href: "/calculators/tax"               },
-  { label: "Education Corpus",      href: "/calculators/education-corpus"  },
+  { label: "SIP Calculator",        href: "/calculators/sip-calculator"               },
+  { label: "EMI Calculator",        href: "/calculators/emi-calculator"               },
+  { label: "Tax Regime Comparator", href: "/calculators/tax-calculator"               },
+  { label: "Education Corpus",      href: "/calculators/education-corpus-calculator"  },
   { label: "Term Cover Estimator",  href: "/insurance/term-insurance-how-much-needed" },
 ];
 
@@ -78,7 +78,7 @@ export default function Footer() {
             {" "}— see your wealth grow in 30 seconds.
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <Link href="/calculators/sip" className="f-btn-em">Try SIP Calculator</Link>
+            <Link href="/calculators/sip-calculator" className="f-btn-em">Try SIP Calculator</Link>
             <Link href="/calculators" className="f-btn-ghost">All Calculators</Link>
           </div>
         </div>
