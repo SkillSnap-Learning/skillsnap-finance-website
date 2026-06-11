@@ -103,8 +103,8 @@ export default function Footer() {
                     <Image
                         src="/images/skillsnap-logo.svg"
                         alt="SkillSnap Finance"
-                        width={66} height={66}
-                        style={{ objectFit: "contain", display: "block" }}
+                        width={156} height={80}
+                        style={{ objectFit: "contain", display: "block", width: 66, height: "auto" }}
                     />
                 </div>
               </div>

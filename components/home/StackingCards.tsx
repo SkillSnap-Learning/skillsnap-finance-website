@@ -151,7 +151,7 @@ export default function StackingCards() {
               }}>
                 {card.num}
               </div>
-              <div style={{
+              <div className="card-icon" style={{
                 width: 44, height: 44, borderRadius: 11,
                 background: "rgba(255,255,255,.12)",
                 border: "1px solid rgba(255,255,255,.15)",
@@ -183,9 +183,11 @@ export default function StackingCards() {
               aspectRatio: "4/3",
             }}>
               <Image
+                className="card-img"
                 src={card.img}
                 alt={card.alt}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 style={{ objectFit: "cover" }}
               />
             </div>
@@ -194,6 +196,45 @@ export default function StackingCards() {
       </div>
 
       <style>{`
+        /* Image slow-zoom on hover */
+        .card-img {
+          transition: transform .8s cubic-bezier(.22,1,.36,1);
+          will-change: transform;
+        }
+        .stack-card:hover .card-img { transform: scale(1.07); }
+
+        /* Icon badge micro-interaction */
+        .card-icon {
+          transition: transform .4s cubic-bezier(.34,1.56,.64,1),
+                      background .4s ease, box-shadow .4s ease;
+        }
+        .stack-card:hover .card-icon {
+          transform: translateY(-3px) rotate(-6deg);
+          background: rgba(255,255,255,.22) !important;
+          box-shadow: 0 10px 26px rgba(0,0,0,.28);
+        }
+
+        /* Scroll-driven entrance + stacking depth.
+           Wrapped so unsupported browsers / reduced-motion keep the static layout. */
+        @media (prefers-reduced-motion: no-preference) {
+          @supports (animation-timeline: view()) {
+            .stack-card {
+              animation: card-reveal linear both, card-stack linear both;
+              animation-timeline: view(), view();
+              animation-range: entry 0% entry 80%,
+                               exit-crossing 0% exit-crossing 100%;
+              transform-origin: center top;
+            }
+            @keyframes card-reveal {
+              from { opacity: 0; translate: 0 70px; }
+              to   { opacity: 1; translate: 0 0; }
+            }
+            @keyframes card-stack {
+              to { scale: .9; filter: brightness(.6) saturate(.92); }
+            }
+          }
+        }
+
         @media (max-width: 768px) {
           .stack-card {
             grid-template-columns: 1fr !important;

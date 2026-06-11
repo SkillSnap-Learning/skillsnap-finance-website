@@ -76,6 +76,7 @@ export default function MacbookSection() {
                   src="/images/sip-calculator.png"
                   alt="SkillSnap Finance calculators"
                   fill
+                  sizes="(max-width: 750px) 88vw, 660px"
                   style={{ objectFit: "contain", background: "white" }}
                 />
               </div>

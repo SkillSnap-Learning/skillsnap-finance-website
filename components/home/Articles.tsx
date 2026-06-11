@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "https://api.skillsnaplearning.com/api/v1";
+const API = process.env.NEXT_PUBLIC_API_URL;
 
 const DEFAULT_BG = "linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 60%,var(--navy-3) 100%)";
 
