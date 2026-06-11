@@ -94,10 +94,10 @@ export default async function CalculatorPage({ params }: Props) {
 
   return (
     <>
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(calculator, slug)) }}
-    />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(calculator, slug)) }}
+      />
       <Navbar />
       <CalculatorShell
         heading={calculator.heading}

@@ -120,8 +120,8 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
                 <Image
                   src="/images/skillsnap-logo.svg"
                   alt="SkillSnap Finance"
-                  width={84} height={84}
-                  style={{ objectFit: "contain" }}
+                  width={156} height={80}
+                  style={{ objectFit: "contain", width: 84, height: "auto" }}
                 />
               </div>
             </div>

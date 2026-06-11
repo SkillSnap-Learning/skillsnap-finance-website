@@ -5,7 +5,7 @@ import Image from "next/image";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "https://api.skillsnaplearning.com/api/v1";
+const API = process.env.NEXT_PUBLIC_API_URL;
 
 function BlogContent() {
   const [activeCat, setActiveCat] = useState("all");
@@ -151,6 +151,7 @@ function BlogContent() {
                         }}>
                           {blog.coverImage ? (
                             <Image src={blog.coverImage} alt={blog.title} fill
+                              sizes="(max-width: 900px) 100vw, 600px"
                               style={{ objectFit: "cover", transition: "transform .4s ease" }}
                               className="feat-img" />
                           ) : (
@@ -243,6 +244,7 @@ function BlogContent() {
                         }}>
                           {blog.coverImage ? (
                             <Image src={blog.coverImage} alt={blog.title} fill
+                              sizes="(max-width: 580px) 100vw, (max-width: 900px) 50vw, 380px"
                               style={{ objectFit: "cover", transition: "transform .4s ease" }}
                               className="blog-img" />
                           ) : (

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "https://api.skillsnaplearning.com/api/v1";
+const API = process.env.NEXT_PUBLIC_API_URL;
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -215,6 +215,7 @@ export default async function ArticlePage({ params }: Props) {
                     src={blog.coverImage}
                     alt={blog.title}
                     fill
+                    sizes="(max-width: 1024px) 100vw, 820px"
                     style={{ objectFit: "cover" }}
                     priority
                   />
@@ -307,7 +308,7 @@ export default async function ArticlePage({ params }: Props) {
                             height: 120, borderRadius: "10px 10px 0 0",
                             overflow: "hidden", position: "relative",
                           }}>
-                            <Image src={post.coverImage} alt={post.title} fill style={{ objectFit: "cover" }} />
+                            <Image src={post.coverImage} alt={post.title} fill sizes="(max-width: 640px) 100vw, 280px" style={{ objectFit: "cover" }} />
                           </div>
                         )}
                         <div style={{ padding: "14px 16px" }}>

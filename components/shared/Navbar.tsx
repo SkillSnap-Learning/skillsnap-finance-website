@@ -408,7 +408,7 @@ function MobLink({ href, label }: { href: string; label: string }) {
 
 function RecentArticles({ onClose }: { onClose: () => void }) {
   const [articles, setArticles] = useState<any[]>([]);
-  const API = process.env.NEXT_PUBLIC_API_URL || "https://api.skillsnaplearning.com/api/v1";
+  const API = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     fetch(`${API}/finance/blogs?isPublished=true&limit=2`)
@@ -471,7 +471,7 @@ function SearchBar() {
   const wrapRef                 = useRef<HTMLDivElement>(null);
   const debounceRef             = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const API = process.env.NEXT_PUBLIC_API_URL || "https://api.skillsnaplearning.com/api/v1";
+  const API = process.env.NEXT_PUBLIC_API_URL;
 
   const POPULAR = [
     { label: "SIP Calculator",          href: "/calculators/sip-calculator"              },
@@ -762,7 +762,7 @@ export default function Navbar() {
             <span style={{ background: "rgba(5,150,105,.3)", color: "#34D399", padding: "2px 8px", borderRadius: 4, fontSize: 10.5, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase" }}>
               Beta
             </span>
-            <Link href="https://skillsnaplearning.com" target="_blank" style={{ display: "flex", alignItems: "center", gap: 5, color: "rgba(255,255,255,.55)", textDecoration: "none", fontWeight: 500, whiteSpace: "nowrap" }}>
+            <Link href="https://skillsnaplearning.com" target="_blank" className="topbar-parent-link" style={{ display: "flex", alignItems: "center", gap: 5, color: "rgba(255,255,255,.55)", textDecoration: "none", fontWeight: 500, whiteSpace: "nowrap" }}>
               <Home size={11} />
               SkillSnap Learning
             </Link>
@@ -784,9 +784,9 @@ export default function Navbar() {
             <Image
               src="/images/skillsnap-logo.svg"
               alt="SkillSnap Finance"
-              width={80}
+              width={156}
               height={80}
-              style={{ borderRadius: 10, flexShrink: 0 }}
+              style={{ borderRadius: 10, flexShrink: 0, width: 80, height: "auto" }}
             />
           </Link>
 
@@ -990,6 +990,10 @@ export default function Navbar() {
         }
         @media (min-width: 961px) {
           .show-mobile { display: none !important; }
+        }
+        /* Top utility bar: drop the external link on small screens so it never overflows */
+        @media (max-width: 600px) {
+          .topbar-parent-link { display: none !important; }
         }
       `}</style>
       <style>{`
